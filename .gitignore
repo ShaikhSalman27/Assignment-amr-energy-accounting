@@ -1,0 +1,26 @@
+﻿# Generated datasets
+data/
+data_full/
+
+# Checkpoints and temporary files
+checkpoints/
+checkpoints_full/
+*.tmp
+
+# Development outputs
+outputs/
+
+# Large intermediate chunk files
+outputs_full/blockload_parts/
+
+# Local Python files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local secrets
+.env
+
+# Local hash-comparison artifact
+outputs_full/parts_before.txt

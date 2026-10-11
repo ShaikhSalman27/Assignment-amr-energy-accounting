@@ -1,0 +1,13 @@
+﻿{
+  "project_name": "AMR Energy Accounting",
+  "dataset_mode": "full",
+  "input_dir": "data_full",
+  "output_dir": "outputs_full",
+  "checkpoint_dir": "checkpoints_full",
+  "window_start": "2026-09-01 00:00:00",
+  "window_end_exclusive": "2026-10-01 00:00:00",
+  "interval_minutes": 30,
+  "chunk_size": 5000,
+  "dtr_loss_threshold_percent": 15.0,
+  "duplicate_key": ["device_serial", "data_timestamp", "import_wh"]
+}
