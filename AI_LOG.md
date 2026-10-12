@@ -1,61 +1,71 @@
 ﻿# AI Usage Log
 
-## Assistants used
+## Assistants and tools used
 
-- ChatGPT: assisted with pipeline implementation, MySQL reporting,
-  debugging, performance analysis, and documentation.
-- MySQL Workbench and PowerShell: used to execute SQL, run scripts,
-  inspect outputs, and verify results.
+- ChatGPT: assistance with Python pipeline implementation, MySQL report
+  logic, checkpoint/resume debugging, performance analysis, and documentation.
+- MySQL Workbench: SQL execution, duplicate detection, timestamp comparison,
+  and EXPLAIN ANALYZE before and after indexing.
+- PowerShell: pipeline execution, CSV inspection, file management, and Git.
 
-## Three most consequential prompts
+## Prompts
 
-The exact wording of the earlier pipeline-generation prompts is not
-preserved in the available conversation record. They are not reproduced
-here as verbatim quotations because reconstructing them would be misleading.
+The following are prompts whose wording is available in the conversation.
+Earlier implementation prompts were not fully preserved in this log, so
+they are not reconstructed and presented as verbatim text.
 
-1. Verbatim prompt available from the current record:
-   "ab kya karu jisse jald se jald yah assignment complete ho"
+1. "ab kya karu jisse jald se jald yah assignment complete ho"
+2. "ab next kya karu or is assignment ka aaj last day he please jald se jald complete karne me help karo"
+3. "ab kya update karu"
 
-2. Earlier prompt: pipeline generation and checkpoint/resume implementation.
-   Exact wording unavailable; not quoted as verbatim.
+These prompts relate to prioritizing completion and documentation. They are
+not claimed to be the three original technical prompts that did the most work.
+The exact wording of earlier technical prompts should be recovered from
+the original chat history if available.
 
-3. Earlier prompt: generation of the R1 communication, R2 DTR energy
-   balance, and R3 exceptions reports.
-   Exact wording unavailable; not quoted as verbatim.
+## Verification performed
 
-## Verification and potential AI failure modes
+### 1. Duplicate HES readings
 
-No two specific cases of a confident but incorrect AI answer have been
-conclusively established from the available evidence. The following
-verification checks were performed to reduce the risk of plausible errors:
+MySQL query grouped readings by device_serial, data_timestamp, and import_wh
+and returned groups with COUNT(*) > 1. Actual examples included serial
+900001837 with duplicate_count = 2 at five timestamps on September 24–26.
+The R3 report also contains 1,960 EXACT_DUPLICATE_HES_READINGS exception
+records. The reporting pipeline states that duplicate readings are
+deduplicated for metrics while raw database rows remain in MySQL.
 
-1. Duplicate HES readings:
-   The report identified repeated reading groups. Examples include
-   serial 700000160 with 16 repeated rows and serial 700000222 with
-   31 repeated rows. The report states that duplicate readings are
-   deduplicated for metrics while raw database rows are retained.
+### 2. Possible timestamp shift
 
-2. Timestamp-shift suspicion:
-   The report identified readings whose import_wh value also appears
-   at a timestamp exactly 330 minutes earlier. This is classified as a
-   possible IST/UTC shift, not a confirmed root cause. Source timestamps
-   require further verification.
+A MySQL self-join compared readings with the same device_serial and import_wh
+at timestamps exactly 330 minutes apart. Actual matching examples were found
+for serial 700000160. The R3 report contains 8,296
+POSSIBLE_IST_UTC_SHIFT_PLUS_330_MIN exceptions. This is evidence of a
+timestamp pattern, not proof that the source timezone is wrong.
 
-3. Cumulative register handling:
-   HES import_wh is a cumulative register, not interval consumption.
-   The reporting logic calculates chronological deltas and handles
-   resets and rollover explicitly. R2 values and exclusions should be
-   checked against the source rows.
+### 3. Performance plan
 
-## Manual verification
+Before the index, EXPLAIN ANALYZE showed a table scan and a Sort node, with
+approximately 12.254 seconds to complete. After creating
+idx_hes_report_order, the plan used a covering index scan and took
+approximately 5.102 seconds. This was a query-level benchmark, not a
+measurement of total report-pipeline speedup.
 
-I ran the full-dataset pipeline, checked the generated report counts,
-inspected actual exception evidence, and executed MySQL EXPLAIN ANALYZE
-before and after creating a composite index. The observed query plan
-changed from table scan plus sort to a covering index scan.
+## Manual work
 
-## Known limitation
+I manually ran SQL in MySQL Workbench, inspected actual returned rows,
+interrupted the pipeline with Ctrl+C after chunk 352, restarted it, and
+verified that it resumed from chunk 353 and completed chunk 571.
 
-The original exact prompts and a verified pair of incorrect AI answers
-must be recovered from the original chat history if available. This log
-does not claim those assignment requirements are fully satisfied.
+## AI-error verification requirement — incomplete
+
+I have not yet established two specific cases where an AI assistant gave a
+confident but incorrect answer on this dataset. I will not invent such cases.
+The checks above are verification examples, not claims that an AI answer was
+proved wrong. This requirement remains incomplete unless genuine examples
+can be recovered from the original interaction history.
+
+## Limitations
+
+The original technical prompts and two verified AI-error examples are not
+fully available in this log. This file distinguishes confirmed test evidence
+from unresolved requirements rather than claiming full compliance.
