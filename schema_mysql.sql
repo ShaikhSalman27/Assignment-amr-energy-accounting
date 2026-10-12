@@ -1,5 +1,5 @@
-
-USE amr_assignment;
+﻿
+USE amr_assignment_full;
 
 CREATE TABLE IF NOT EXISTS device_info (
     device_identifier VARCHAR(100),
@@ -42,3 +42,4 @@ CREATE TABLE IF NOT EXISTS billing_profile (
     mdm_connection_status VARCHAR(50),
     bill_status VARCHAR(50)
 );
+

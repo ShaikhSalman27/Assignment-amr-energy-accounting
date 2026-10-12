@@ -14,9 +14,11 @@ The following are prompts whose wording is available in the conversation.
 Earlier implementation prompts were not fully preserved in this log, so
 they are not reconstructed and presented as verbatim text.
 
-1. "ab kya karu jisse jald se jald yah assignment complete ho"
-2. "ab next kya karu or is assignment ka aaj last day he please jald se jald complete karne me help karo"
-3. "ab kya update karu"
+Error solve karna: “Pipeline mein PermissionError aa raha hai, ise kaise fix karun aur processing resume kaise karun?”
+
+Progress check: “Abhi assignment kitna complete hua hai aur next kya karna chahiye?”
+
+Output samajhna: “Resume test ka output samjhao aur kaise verify karun ki pipeline sahi se complete hui hai?”
 
 These prompts relate to prioritizing completion and documentation. They are
 not claimed to be the three original technical prompts that did the most work.
