@@ -1,25 +1,41 @@
-### Finding: Conflicting Consumer-to-DTR Master Mappings
+### F-01: Conflicting Consumer-to-DTR Master Mappings
 
-**Issue:** The `device_info` master contains six consumer IDs mapped to two different DTRs each.
+**Issue:** Six consumer IDs have two master records each, with each record assigning the consumer to a different DTR.
 
-**Quantified impact (development dataset):**
+**Quantified impact (verified query output):**
 - 6 affected consumer IDs
 - 12 master records across these IDs
-- 6 conflicting duplicate records beyond one record per consumer
-- The same device serial and image serial appear under two different DTR assignments.
+- 6 conflicting records beyond one record per consumer
+- Definitive DTR-level energy attribution is ambiguous for these consumers until the mapping is resolved.
 
-**Evidence:** The duplicate-mapping SQL query returned the following examples:
+**Evidence — SQL used:**
 
-| Consumer ID | Conflicting DTRs |
-|---|---|
-| GPM900000004 | DTR-01, DTR-02 |
-| GPM900000126 | DTR-02, DTR-03 |
-| GPM900000132 | DTR-02, DTR-03 |
-| GPM900000193 | DTR-02, DTR-03 |
-| GPM900000310 | DTR-01, DTR-04 |
-| GPM900000355 | DTR-01, DTR-04 |
+```sql
+SELECT
+    device_identifier,
+    COUNT(*) AS master_rows,
+    COUNT(DISTINCT dtr_name) AS distinct_dtrs,
+    GROUP_CONCAT(DISTINCT dtr_name ORDER BY dtr_name) AS dtr_names
+FROM device_info
+GROUP BY device_identifier
+HAVING COUNT(DISTINCT dtr_name) > 1
+ORDER BY device_identifier;
+```
 
-**Handling:** Do not arbitrarily select one DTR mapping. Flag conflicting consumer IDs, exclude them from definitive DTR-level energy attribution until the mapping is resolved, and report the excluded count separately.
+**Actual rows returned by MySQL:**
+
+| Consumer ID | Master rows | Distinct DTRs | Conflicting DTRs |
+|---|---:|---:|---|
+| GPM900000362 | 2 | 2 | DTR-04 (by AMISP), DTR-05 (by AMISP) |
+| GPM900000543 | 2 | 2 | DTR-06 (by AMISP), DTR-07 (by AMISP) |
+| GPM900000888 | 2 | 2 | DTR-09 (by AMISP), DTR-10 (by AMISP) |
+| GPM900001641 | 2 | 2 | DTR-17 (by AMISP), DTR-18 (by AMISP) |
+| GPM900001691 | 2 | 2 | DTR-17 (by AMISP), DTR-18 (by AMISP) |
+| GPM900001993 | 2 | 2 | DTR-01 (by AMISP), DTR-20 (by AMISP) |
+
+**Handling:** Do not arbitrarily select one DTR mapping. Flag these consumer IDs and exclude them from definitive DTR-level energy attribution until the mapping is resolved. Report the exclusion count separately.
+
+
 ### F-02 Exact Duplicate HES Readings in Full Dataset
 
 **Impact:** The R3 report contains 1,960 `EXACT_DUPLICATE_HES_READINGS` exception records. If repeated readings are counted more than once, they can distort received-block counts or cumulative-register delta calculations. The total energy impact has not been separately quantified.
