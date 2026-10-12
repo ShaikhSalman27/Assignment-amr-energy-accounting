@@ -78,3 +78,28 @@ One earlier checkpoint update encountered a Windows `PermissionError` and requir
 - R3 records 8,296 possible timestamp-shift cases; this is not proof of a confirmed timezone defect.
 - R3 records 1,960 exact duplicate-reading exceptions and 1,585 estimated-day exceptions.
 - Ambiguous mappings, resets, and out-of-window readings require explicit handling before drawing operational conclusions.
+
+## Actual 60% kill-and-resume test
+
+The full-dataset pipeline was tested using separate test output and
+checkpoint directories to protect the final reports.
+
+The pipeline was interrupted with Ctrl+C after chunk 352:
+
+```text
+Saved chunk 350: 1,750,000 rows total
+Saved chunk 351: 1,755,000 rows total
+Saved chunk 352: 1,760,000 rows total
+KeyboardInterrupt
+```
+
+After restarting, the actual output began:
+
+```text
+Resuming after completed chunk 352.
+Saved chunk 353: 1,765,000 rows total
+```
+
+The pipeline then completed all 571 chunks and processed 2,853,458
+source rows. The test used `outputs_resume_test` and
+`checkpoints_resume_test`; the final report outputs were kept separate.
